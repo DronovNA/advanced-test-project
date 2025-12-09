@@ -1,0 +1,59 @@
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra --strict-markers --tb=short -v"
+testpaths = ["backend/tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+markers = [
+    "smoke: smoke tests - critical functionality",
+    "regression: regression tests - full test suite",
+    "integration: integration tests",
+    "e2e: end-to-end tests",
+    "unit: unit tests",
+    "async: async tests",
+    "db: database tests",
+]
+asyncio_mode = "auto"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+
+[tool.coverage.run]
+source = ["backend/app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
