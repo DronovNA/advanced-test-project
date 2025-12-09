@@ -1,10 +1,20 @@
-name: UI Tests
+# UI Tests Workflow
+# 
+# DISABLED: This workflow requires full environment setup:
+# - Running frontend server (localhost:3000)
+# - Playwright browsers installation
+# - Chrome/ChromeDriver for Selenium
+# 
+# To run UI tests locally:
+# 1. docker-compose up -d
+# 2. docker-compose exec backend pytest tests/ui/ -v
+#
+# To enable in CI, change 'workflow_dispatch' to 'push'
+
+name: UI Tests (Manual)
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:  # Only run manually
 
 jobs:
   ui-tests:
