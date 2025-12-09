@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User, Task
 import hashlib
+import uuid
 
 @pytest.mark.integration
 @pytest.mark.regression
@@ -10,10 +11,11 @@ class TestTaskEndpoints:
     
     @pytest.fixture
     async def user_fixture(self, test_session):
-        """Create test user"""
+        """Create test user with unique username"""
+        unique_id = str(uuid.uuid4())[:8]
         user = User(
-            email="tasktest@example.com",
-            username="taskuser",
+            email=f"tasktest{unique_id}@example.com",
+            username=f"taskuser{unique_id}",
             hashed_password=hashlib.sha256(b"pass").hexdigest()
         )
         test_session.add(user)
