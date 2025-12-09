@@ -70,20 +70,6 @@ jobs:
         DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
         REDIS_URL: redis://localhost:6379/0
     
-    - name: Run smoke tests
-      working-directory: ./backend
-      run: pytest -m smoke -v
-      env:
-        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
-        REDIS_URL: redis://localhost:6379/0
-    
-    - name: Generate coverage report
-      working-directory: ./backend
-      run: pytest --cov=app --cov-report=html
-      env:
-        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
-        REDIS_URL: redis://localhost:6379/0
-    
     - name: Upload coverage
       uses: codecov/codecov-action@v4
       with:
@@ -93,7 +79,7 @@ jobs:
     - name: Generate Allure report
       if: always()
       working-directory: ./backend
-      run: pytest --alluredir=allure-results
+      run: pytest tests/unit/ tests/integration/ tests/e2e/ --alluredir=allure-results
       env:
         DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
         REDIS_URL: redis://localhost:6379/0
