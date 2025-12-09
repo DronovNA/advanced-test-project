@@ -1,78 +1,84 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import './App.css'
-
-interface HealthStatus {
-  status: string
-}
+import { Task, CreateTaskRequest } from './types'
+import { TaskList } from './components/TaskList'
+import { TaskForm } from './components/TaskForm'
 
 function App() {
-  const [status, setStatus] = useState<string>('checking...')
+  const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mockUserId = 1
 
   useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const response = await axios.get<HealthStatus>('/api/health')
-        setStatus(response.data.status)
-        setError(null)
-      } catch (err) {
-        setError('Failed to connect to API')
-        setStatus('offline')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkHealth()
+    loadTasks()
   }, [])
 
+  const loadTasks = async () => {
+    try {
+      const response = await axios.get(`/api/v1/tasks/?owner_id=${mockUserId}`)
+      setTasks(response.data)
+      setError(null)
+    } catch (err) {
+      setError('Failed to load tasks')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createTask = async (taskData: CreateTaskRequest) => {
+    try {
+      const response = await axios.post(`/api/v1/tasks/?owner_id=${mockUserId}`, taskData)
+      setTasks([...tasks, response.data])
+    } catch (err) {
+      setError('Failed to create task')
+    }
+  }
+
+  const toggleTask = async (id: number) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+
+    try {
+      const response = await axios.put(`/api/v1/tasks/${id}`, {
+        title: task.title,
+        description: task.description,
+        completed: !task.completed
+      })
+      setTasks(tasks.map(t => t.id === id ? response.data : t))
+    } catch (err) {
+      setError('Failed to update task')
+    }
+  }
+
+  const deleteTask = async (id: number) => {
+    try {
+      await axios.delete(`/api/v1/tasks/${id}`)
+      setTasks(tasks.filter(t => t.id !== id))
+    } catch (err) {
+      setError('Failed to delete task')
+    }
+  }
+
   return (
-    <div className="container">
-      <header>
-        <h1>Advanced Test Project</h1>
-        <p>Full-stack application with comprehensive testing</p>
+    <div className="app">
+      <header className="app-header">
+        <h1>Task Manager</h1>
+        <p>Advanced Test Project</p>
       </header>
 
-      <main>
-        <div className="status-card">
-          <h2>API Status</h2>
-          {loading ? (
-            <p>Checking API connection...</p>
-          ) : (
-            <>
-              <p className={`status ${status}`}>Status: {status}</p>
-              {error && <p className="error">{error}</p>}
-            </>
-          )}
-        </div>
-
-        <section className="info">
-          <h2>Project Information</h2>
-          <ul>
-            <li>Backend: FastAPI with REST API, gRPC, WebSocket</li>
-            <li>Testing: Complete test pyramid with pytest</li>
-            <li>Database: PostgreSQL with SQLAlchemy ORM</li>
-            <li>Cache: Redis</li>
-            <li>DevOps: Docker, GitHub Actions, Allure</li>
-          </ul>
-        </section>
-
-        <section className="links">
-          <h2>Resources</h2>
-          <a href="http://localhost:8000/docs" target="_blank">
-            API Documentation (Swagger)
-          </a>
-          <a href="https://github.com/DronovNA/advanced-test-project" target="_blank">
-            GitHub Repository
-          </a>
-        </section>
+      <main className="app-main">
+        {error && <div className="error-message">{error}</div>}
+        
+        <TaskForm onSubmit={createTask} />
+        
+        {loading ? (
+          <p>Loading tasks...</p>
+        ) : (
+          <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
+        )}
       </main>
-
-      <footer>
-        <p>&copy; 2025 Advanced Test Project. All rights reserved.</p>
-      </footer>
     </div>
   )
 }
