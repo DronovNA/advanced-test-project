@@ -3,22 +3,214 @@
 [![Tests](https://github.com/DronovNA/advanced-test-project/workflows/Test%20Suite/badge.svg)](https://github.com/DronovNA/advanced-test-project/actions)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 
-**A comprehensive full-stack web application with production-grade test suite demonstrating advanced testing practices, design patterns, and DevOps workflows.**
+**A comprehensive full-stack web application with production-grade test suite demonstrating advanced testing practices, UI automation, and modern web technologies.**
 
 ## 📋 Overview
 
 This project showcases:
-- **Backend**: FastAPI with REST API, gRPC, WebSocket support
-- **Frontend**: React with TypeScript components
-- **Database**: PostgreSQL with SQLAlchemy ORM + Redis caching
-- **Testing**: Complete testing pyramid (Unit → Integration → E2E)
-- **CI/CD**: GitHub Actions with Allure reports
+- **Backend**: FastAPI with REST API, gRPC, WebSocket
+- **Frontend**: React Task Manager with full CRUD operations
+- **Testing**: Complete pyramid (Unit → Integration → E2E → UI)
+- **UI Automation**: Playwright, Selenium WebDriver, Selene
+- **Database**: PostgreSQL + Redis caching
+- **CI/CD**: GitHub Actions with Selenoid
 - **Containerization**: Docker & Docker Compose
 
 ### 🎯 Target Audience
-- QA Engineers seeking to demonstrate testing expertise
-- Freelancers building portfolio projects
-- Teams evaluating test automation frameworks
+- QA Automation Engineers
+- Full-stack developers
+- DevOps engineers
+- Teams evaluating test frameworks
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+```bash
+# Required
+Docker & Docker Compose
+Python 3.11+
+Node.js 20+
+
+# Optional (for local development)
+PostgreSQL 15+
+Redis 7+
+```
+
+### Setup
+
+```bash
+# Clone repository
+git clone https://github.com/DronovNA/advanced-test-project.git
+cd advanced-test-project
+
+# Start all services
+docker-compose up --build
+
+# Access services
+# Backend API: http://localhost:8000
+# Frontend UI: http://localhost:3000
+# API Docs: http://localhost:8000/docs
+# Selenoid UI: http://localhost:8080
+```
+
+### Run Tests
+
+```bash
+# All tests
+pytest tests/ -v
+
+# By layer
+pytest tests/unit/ -v              # Unit tests
+pytest tests/integration/ -v       # Integration tests
+pytest tests/e2e/ -v               # E2E tests
+pytest tests/ui/ -v                # UI tests
+
+# By technology
+pytest tests/ui/test_tasks_playwright.py -v  # Playwright
+pytest tests/ui/test_tasks_selenium.py -v    # Selenium
+pytest tests/ui/test_tasks_selene.py -v      # Selene
+
+# By markers
+pytest -m smoke -v                 # Smoke tests
+pytest -m regression -v            # Regression tests
+pytest -m ui -v                    # All UI tests
+
+# With coverage
+pytest --cov=app --cov-report=html
+
+# With Allure report
+pytest --alluredir=allure-results
+allure serve allure-results
+```
+
+---
+
+## 🔬 Testing Architecture
+
+### Testing Pyramid
+
+```
+       E2E (Workflows)              ▲
+      /                \            │
+     /  Integration     \           │ Complexity
+    /   (API, DB)       \           │
+   /____________________\           │
+  /     Unit Tests       \          │
+ /_______________________\          ▼
+```
+
+### Test Distribution
+
+| Type | Count | Tools | Focus |
+|------|-------|-------|-------|
+| **Unit** | 20 | pytest, hypothesis | Business logic |
+| **Integration** | 15 | pytest-asyncio, httpx | API endpoints |
+| **E2E** | 10 | pytest, gRPC | Full workflows |
+| **UI** | 19 | Playwright, Selenium, Selene | User interface |
+| **Total** | 64 | — | — |
+
+### UI Testing Frameworks
+
+#### Playwright (7 tests)
+- Modern async API
+- Auto-wait capabilities
+- Cross-browser support
+- Screenshot/video recording
+
+```python
+async def test_create_task_ui(browser_page):
+    await browser_page.goto("http://localhost:3000")
+    await browser_page.fill("#task-title", "New Task")
+    await browser_page.click("#create-task-btn")
+    assert await browser_page.text_content(".task-title") == "New Task"
+```
+
+#### Selenium WebDriver (7 tests)
+- Industry standard
+- Wide browser support
+- Mature ecosystem
+- Cloud grid integration
+
+```python
+def test_create_task_selenium(driver):
+    driver.get("http://localhost:3000")
+    driver.find_element(By.ID, "task-title").send_keys("New Task")
+    driver.find_element(By.ID, "create-task-btn").click()
+    assert "New Task" in driver.page_source
+```
+
+#### Selene (5 tests)
+- Clean API
+- Less boilerplate
+- Built-in smart waits
+- Concise syntax
+
+```python
+def test_create_task_selene():
+    browser.open("/")
+    browser.element("#task-title").type("New Task")
+    browser.element("#create-task-btn").click()
+    browser.element(".task-title").should(have.text("New Task"))
+```
+
+---
+
+## 🔧 Technology Stack
+
+### Backend
+- **FastAPI** — Modern web framework
+- **gRPC** — High-performance RPC
+- **WebSocket** — Real-time updates
+- **PostgreSQL** — Primary database
+- **Redis** — Caching layer
+- **SQLAlchemy** — Async ORM
+- **Pydantic** — Data validation
+
+### Frontend
+- **React 18** — UI library
+- **TypeScript** — Type safety
+- **Vite** — Build tool
+- **Axios** — HTTP client
+
+### Testing
+- **pytest** — Test framework
+- **Playwright** — Modern UI automation
+- **Selenium** — Classic UI automation
+- **Selene** — Simplified Selenium
+- **pytest-asyncio** — Async support
+- **pytest-cov** — Coverage
+- **hypothesis** — Property-based testing
+- **Allure** — Test reporting
+
+### DevOps
+- **Docker** — Containerization
+- **GitHub Actions** — CI/CD
+- **Selenoid** — Browser automation grid
+- **pytest-xdist** — Parallel execution
+
+---
+
+## 📊 CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+#### Backend Tests
+```
+Trigger → Lint → Unit → Integration → E2E → Allure Report
+```
+
+#### UI Tests
+```
+Trigger → Setup Browsers → Build Frontend → Run Playwright → Run Selenium → Run Selene → Upload Artifacts
+```
+
+### Selenoid Integration
+- Isolated browser sessions
+- Video recording on failure
+- Parallel test execution
+- Cross-browser testing
 
 ---
 
@@ -29,260 +221,136 @@ advanced-test-project/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── rest/
-│   │   │   ├── grpc/
-│   │   │   └── websocket/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   ├── database/
-│   │   └── config.py
+│   │   │   ├── rest/          # REST endpoints
+│   │   │   ├── grpc/          # gRPC services
+│   │   │   └── websocket/     # WebSocket handlers
+│   │   ├── models/            # SQLAlchemy models
+│   │   ├── schemas/           # Pydantic schemas
+│   │   ├── services/          # Business logic
+│   │   └── config.py          # Configuration
 │   ├── tests/
-│   │   ├── unit/
-│   │   ├── integration/
-│   │   ├── e2e/
-│   │   ├── fixtures/
-│   │   └── conftest.py
-│   ├── requirements.txt
-│   └── Dockerfile
+│   │   ├── unit/              # Unit tests
+│   │   ├── integration/       # Integration tests
+│   │   ├── e2e/               # E2E tests
+│   │   ├── ui/                # UI tests (Playwright/Selenium/Selene)
+│   │   └── conftest.py        # Test fixtures
+│   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── services/
-│   ├── package.json
-│   └── Dockerfile
-├── docker-compose.yml
-├── .github/workflows/
-│   ├── tests.yml
-│   └── deploy.yml
+│   │   ├── components/        # React components
+│   │   ├── types/             # TypeScript types
+│   │   ├── App.tsx            # Main app
+│   │   └── App.css            # Styles
+│   └── package.json
 ├── docs/
-│   ├── API.md
-│   ├── TESTING.md (RU/EN)
-│   └── SETUP.md (RU/EN)
+│   ├── TESTING.md             # Testing guide (EN)
+│   ├── UI_TESTING.md          # UI testing guide
+│   ├── GRPC.md                # gRPC guide
+│   ├── WEBSOCKET.md           # WebSocket guide
+│   └── ru/                    # Russian docs
+├── .github/workflows/
+│   ├── tests.yml              # Backend tests
+│   └── ui-tests.yml           # UI tests
+├── docker-compose.yml
+├── selenoid/
+│   └── browsers.json          # Selenoid config
 └── pytest.ini
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🏆 Key Features
 
-### Prerequisites
-- Docker & Docker Compose
-- Python 3.11+
-- Node.js 18+
-- Git
+### ✅ Testing Excellence
+- **64 automated tests** across all layers
+- **80%+ code coverage**
+- **UI automation** with 3 frameworks
+- **Parallel test execution**
+- **Allure reports** with rich artifacts
+- **CI/CD integration** with GitHub Actions
 
-### Setup & Run
+### ✅ Real Application
+- **Task Manager** with full CRUD
+- **REST API** with Swagger docs
+- **gRPC API** for microservices
+- **WebSocket** for real-time updates
+- **React UI** with TypeScript
 
-```bash
-git clone https://github.com/DronovNA/advanced-test-project.git
-cd advanced-test-project
+### ✅ Production Patterns
+- **AAA test pattern**
+- **Page Object Model** (for UI tests)
+- **Factory pattern** (test data)
+- **Fixture composition**
+- **Test isolation**
 
-docker-compose up --build
-```
-
-Backend: `http://localhost:8000`
-Frontend: `http://localhost:3000`
-API Docs: `http://localhost:8000/docs`
-
-### Run Tests
-
-```bash
-# All tests with Allure report
-docker-compose exec backend pytest --alluredir=allure-results
-
-# Specific test suite
-docker-compose exec backend pytest tests/unit/ -v
-docker-compose exec backend pytest tests/integration/ -v
-docker-compose exec backend pytest tests/e2e/ -v
-
-# Smoke tests
-docker-compose exec backend pytest -m smoke -v
-
-# Regression tests
-docker-compose exec backend pytest -m regression -v
-
-# With coverage
-docker-compose exec backend pytest --cov=app --cov-report=html
-```
-
----
-
-## 🔬 Testing Architecture
-
-### Testing Pyramid
-
-```
-        E2E (gRPC, WebSocket)          ▲
-       /                    \           │
-      /   Integration Tests   \         │ Coverage
-     /  (API, Database, Cache)  \       │
-    /_______________________ \  │
-   /    Unit Tests           \ │▼
-  /____________________________\
-```
-
-### Test Types
-
-| Type | Count | Tools | Focus |
-|------|-------|-------|-------|
-| **Unit** | ~50 | pytest, hypothesis | Business logic, utilities |
-| **Integration** | ~30 | pytest, testcontainers | API endpoints, DB operations |
-| **E2E** | ~20 | pytest-asyncio, gRPC | Full workflows, user scenarios |
-| **Smoke** | ~15 | Marked with `@pytest.mark.smoke` | Critical paths |
-| **Regression** | ~85 | All tests with `@pytest.mark.regression` | Stability across versions |
-
-### Design Patterns
-
-- **AAA Pattern** (Arrange, Act, Assert)
-- **Page Object Model** (API endpoint objects)
-- **Factory Pattern** (Test data generation)
-- **Fixture Pattern** (Shared setup/teardown)
-- **Parametrization** (Test coverage optimization)
-
----
-
-## 🔧 Technology Stack
-
-### Backend
-- **FastAPI** — Web framework
-- **gRPC** — High-performance RPC
-- **WebSocket** — Real-time communication
-- **PostgreSQL** — Primary database
-- **Redis** — Caching layer
-- **SQLAlchemy** — ORM
-- **Pydantic** — Data validation
-
-### Testing
-- **pytest** — Test framework
-- **pytest-asyncio** — Async test support
-- **pytest-cov** — Coverage analysis
-- **hypothesis** — Property-based testing
-- **HTTPX** — Async HTTP client
-- **grpcio** — gRPC client
-- **docker** — Containerization for test isolation
-
-### Frontend
-- **React 18** — UI library
-- **TypeScript** — Type safety
-- **Vite** — Build tool
-- **Axios** — HTTP client
-
-### DevOps
-- **Docker** — Containerization
-- **GitHub Actions** — CI/CD
-- **Allure** — Test reporting
-- **pytest-xdist** — Parallel test execution
-
----
-
-## 📊 CI/CD Workflow
-
-### GitHub Actions
-- ✅ Runs on every PR and push to main
-- ✅ Unit → Integration → E2E tests
-- ✅ Code coverage reports
-- ✅ Allure reports generated
-- ✅ Docker image builds
-
-```yaml
-Trigger → Lint → Unit Tests → Integration Tests → E2E Tests → Allure Report
-```
+### ✅ DevOps Ready
+- **Docker multi-stage builds**
+- **Health checks**
+- **Environment configuration**
+- **Logging and monitoring hooks**
+- **Graceful shutdown**
 
 ---
 
 ## 📚 Documentation
 
-- **[TESTING.md](docs/TESTING.md)** — Testing strategy, patterns, best practices
-- **[API.md](docs/API.md)** — REST, gRPC, WebSocket endpoints
-- **[SETUP.md](docs/SETUP.md)** — Development environment setup
-- **[RU Docs](docs/ru/)** — Russian language documentation
+- **[UI_TESTING.md](docs/UI_TESTING.md)** — Playwright, Selenium, Selene guides
+- **[GRPC.md](docs/GRPC.md)** — gRPC API documentation
+- **[WEBSOCKET.md](docs/WEBSOCKET.md)** — WebSocket guide
+- **[Russian Docs](docs/ru/)** — Full documentation in Russian
 
 ---
 
-## 🏆 Key Features Demonstrated
+## 💡 Use Cases
 
-✅ **Testing Expertise**
-- Complete test pyramid implementation
-- Smoke & regression test organization
-- Parametrized tests for efficiency
-- Async test handling
-- Database transaction testing
+### 👨‍💼 For Job Interviews
+"I built a full-stack application with:
+- 64 automated tests (UI + API + Unit)
+- Three UI automation frameworks
+- CI/CD with Selenoid
+- 80%+ test coverage"
 
-✅ **Code Quality**
-- 85%+ code coverage
-- Type hints throughout
-- Docstrings and comments (minimal, purposeful)
-- PEP 8 compliance
-- Pre-commit hooks
+### 💼 For Portfolio
+- Demonstrates modern testing practices
+- Shows full-stack capabilities
+- Proves DevOps knowledge
+- Real working application
 
-✅ **Best Practices**
-- Factory patterns for test data
-- Fixture composition
-- Test isolation (each test is independent)
-- Clear test naming (describe what, why, expected)
-- AAA pattern consistency
-
-✅ **Production Readiness**
-- Docker multi-stage builds
-- Environment configuration management
-- Health checks
-- Graceful shutdown
-- Error handling and logging
-
----
-
-## 💡 Usage Scenarios
-
-### For Job Interviews
-Show this project to demonstrate:
-- "I've built a full-stack application with complete test coverage"
-- "Here's how I structure tests at scale"
-- "This is my CI/CD pipeline and test reporting"
-
-### For Freelance Bids
-Link to repository to show:
-- Testing standards you maintain
-- Architecture decisions and rationale
-- DevOps and containerization skills
-- Full project lifecycle management
-
-### For Learning
-Use as reference for:
-- How to organize pytest projects
-- Implementing test pyramids correctly
-- Async/gRPC testing patterns
+### 📖 For Learning
+- Reference for test architecture
+- UI automation patterns
+- Async testing examples
 - Docker-based test environments
 
 ---
 
-## 🤝 Contributing
+## 🤝 Technologies Demonstrated
 
-This is a portfolio project. If you'd like to use it as a base for your own project:
-
-1. Fork the repository
-2. Remove/modify project-specific code
-3. Adapt tests to your business logic
-4. Deploy your version
+✅ Python (FastAPI, pytest, SQLAlchemy)  
+✅ JavaScript/TypeScript (React, Vite)  
+✅ UI Automation (Playwright, Selenium, Selene)  
+✅ API Testing (REST, gRPC, WebSocket)  
+✅ Databases (PostgreSQL, Redis)  
+✅ DevOps (Docker, GitHub Actions, Selenoid)  
+✅ Test Design (Patterns, Best Practices)  
 
 ---
 
 ## 📞 Contact
 
 - **Email**: nikita.dronov.a@gmail.com
-- **Twitter**: @DronovNA
-- **Portfolio**: [GitHub](https://github.com/DronovNA)
+- **GitHub**: [@DronovNA](https://github.com/DronovNA)
+- **Location**: Málaga, Spain
 
 ---
 
 ## 📄 License
 
-MIT License — feel free to use this project as reference or base for your own work.
+MIT License — Free to use as reference or template.
 
 ---
 
 **Last Updated**: December 2025  
-**Python Version**: 3.11+  
-**Status**: Active Development
+**Status**: Production Ready  
+**Test Count**: 64 automated tests  
+**Coverage**: 80%+
