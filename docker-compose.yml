@@ -52,5 +52,42 @@ services:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: test-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://backend:8000
+
+  selenoid:
+    image: aerokube/selenoid:latest-release
+    container_name: selenoid
+    ports:
+      - "4444:4444"
+    volumes:
+      - "./selenoid:/etc/selenoid"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./selenoid/video:/opt/selenoid/video"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=./selenoid/video
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video"]
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui:latest-release
+    container_name: selenoid-ui
+    ports:
+      - "8080:8080"
+    command: ["--selenoid-uri", "http://selenoid:4444"]
+    depends_on:
+      - selenoid
+
 volumes:
   postgres_data:

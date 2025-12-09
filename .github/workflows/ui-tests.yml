@@ -1,0 +1,124 @@
+name: UI Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install Python dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Install Playwright browsers
+      working-directory: ./backend
+      run: python -m playwright install --with-deps chromium
+    
+    - name: Install Chrome for Selenium
+      run: |
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+    
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm install
+    
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+    
+    - name: Start backend
+      working-directory: ./backend
+      run: |
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        sleep 5
+      env:
+        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Start frontend
+      working-directory: ./frontend
+      run: |
+        npm run preview -- --port 3000 --host &
+        sleep 3
+    
+    - name: Run Playwright UI tests
+      working-directory: ./backend
+      run: pytest tests/ui/test_tasks_playwright.py -v --tb=short
+      env:
+        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Run Selenium UI tests
+      working-directory: ./backend
+      run: pytest tests/ui/test_tasks_selenium.py -v --tb=short
+      env:
+        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Run Selene UI tests
+      working-directory: ./backend
+      run: pytest tests/ui/test_tasks_selene.py -v --tb=short
+      env:
+        DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Upload test screenshots
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-screenshots
+        path: backend/screenshots/
+    
+    - name: Upload test videos
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-videos
+        path: backend/videos/
