@@ -49,6 +49,7 @@ docker-compose exec backend pytest --cov=app --cov-report=html
 | UI (Playwright) | 7 | ⚠️ Local |
 | UI (Selenium) | 7 | ⚠️ Local |
 | UI (Selene) | 5 | ⚠️ Local |
+| **Total** | **49** | - |
 
 ## Tech Stack
 
@@ -57,11 +58,30 @@ docker-compose exec backend pytest --cov=app --cov-report=html
 **Testing**: pytest, Playwright, Selenium, Selene  
 **DevOps**: Docker, GitHub Actions
 
+## Project Structure
+
+```
+backend/
+├── app/
+│   ├── api/rest/          # REST endpoints
+│   ├── models/            # SQLAlchemy models
+│   ├── schemas/           # Pydantic schemas
+│   ├── services/          # Business logic
+│   └── main.py
+├── tests/
+│   ├── unit/              # 15 tests
+│   ├── integration/       # 10 tests
+│   ├── e2e/               # 5 tests
+│   └── ui/                # 19 tests
+frontend/
+├── src/
+│   ├── components/
+│   └── App.tsx
+```
+
 ## Documentation
 
 - [UI Testing Guide](docs/UI_TESTING.md)
-- [gRPC Structure](docs/GRPC.md)
-- [WebSocket Integration](docs/WEBSOCKET.md)
 
 ## Contact
 
