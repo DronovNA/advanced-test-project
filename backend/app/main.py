@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
@@ -6,6 +6,7 @@ import logging
 from app.config import get_settings
 from app.database import engine, Base
 from app.api.rest import router as rest_router
+from app.api.websocket.tasks import websocket_endpoint
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -33,6 +34,10 @@ app.add_middleware(
 )
 
 app.include_router(rest_router, prefix="/api/v1", tags=["API v1"])
+
+@app.websocket("/ws/tasks/{user_id}")
+async def websocket_tasks(websocket: WebSocket, user_id: int):
+    await websocket_endpoint(websocket, user_id)
 
 @app.get("/health")
 async def health_check():
